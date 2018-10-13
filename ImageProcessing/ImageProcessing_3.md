@@ -7,7 +7,7 @@
 
 
 
-### 회선(convolution)
+#### 회선(convolution)
 
 회선은 출력 픽셀의 값을 입력 픽셀과 그 주위의 픽셀 값에 회선 마스크의 값을 곱하여 합한 값으로 나타내는 방법이다.
 
@@ -48,11 +48,13 @@
 
 입력 픽셀 값을 주위 픽셀 값들과의 평균 값으로 변환하는 다음과 같은 회선 마스크를 널리 사용
 
-$M = \begin{bmatrix} \frac{1}{9} & \frac{1}{9} & \frac{1}{9} \\ \frac{1}{9} & \frac{1}{9} & \frac{1}{9}  \\ \frac{1}{9} & \frac{1}{9} & \frac{1}{9}  \end{bmatrix}$
+$$M = \begin{bmatrix} \frac{1}{9} & \frac{1}{9} & \frac{1}{9} \\ \frac{1}{9} & \frac{1}{9} & \frac{1}{9}  \\ \frac{1}{9} & \frac{1}{9} & \frac{1}{9}  \end{bmatrix}$$
 
 
 
-$M = \begin{bmatrix} \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \end{bmatrix}$
+
+
+$$M = \begin{bmatrix} \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \\ \frac{1}{25} & \frac{1}{25} & \frac{1}{25}  & \frac{1}{25} & \frac{1}{25} \end{bmatrix}$$
 
 
 
@@ -60,11 +62,11 @@ $M = \begin{bmatrix} \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} &
 
 선명한 영상 생성을 위한 회선 마스크
 
-1)마스크 1 $M = \begin{bmatrix} 0 & -1 & 0 \\ -1 & 5 & -1  \\ 0 & -1 & 0  \end{bmatrix}$
+1)마스크 1 $$M = \begin{bmatrix} 0 & -1 & 0 \\ -1 & 5 & -1  \\ 0 & -1 & 0  \end{bmatrix}$$
 
 
 
-2) 마스크 2  $M = \begin{bmatrix} -1 & -1 & -1 \\ -1 & 9 & -1  \\ -1 & -1 & -1  \end{bmatrix}$
+2) 마스크 2  $$M = \begin{bmatrix} -1 & -1 & -1 \\ -1 & 9 & -1  \\ -1 & -1 & -1  \end{bmatrix}$$
 
 
 
@@ -84,15 +86,15 @@ $M = \begin{bmatrix} \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} &
 
     |         | 수평   경계선                                                | 수직   경계선                                                |
     | ------- | ------------------------------------------------------------ | ------------------------------------------------------------ |
-    | Prewitt | $\begin{bmatrix} -1 & -1 & -1 \\ 0 & 0 & 0 \\ 1 & 1 & 1 \end{bmatrix}$ | $\begin{bmatrix} 1 & 0 & -1 \\ 1 & 0 & -1 \\ 1 & 0 & -1 \end{bmatrix}$ |
-    | Roberts | $\begin{bmatrix} -1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{bmatrix}$ | $\begin{bmatrix} 0 & 0 & -1 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{bmatrix}$ |
-    | Sobel   | $\begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ 1 & 2 & 1 \end{bmatrix}$ | $\begin{bmatrix} 1 & 0 & -1 \\ 2 & 0 & -2 \\ 1 & 0 & -1 \end{bmatrix}$ |
+    | Prewitt | $$\begin{bmatrix} -1 & -1 & -1 \\ 0 & 0 & 0 \\ 1 & 1 & 1 \end{bmatrix}$$ | $$\begin{bmatrix} 1 & 0 & -1 \\ 1 & 0 & -1 \\ 1 & 0 & -1 \end{bmatrix}$$ |
+    | Roberts | $$\begin{bmatrix} -1 & 0 & 0 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{bmatrix}$$ | $$\begin{bmatrix} 0 & 0 & -1 \\ 0 & 1 & 0 \\ 0 & 0 & 0 \end{bmatrix}$$ |
+    | Sobel   | $$\begin{bmatrix} -1 & -2 & -1 \\ 0 & 0 & 0 \\ 1 & 2 & 1 \end{bmatrix}$$ | $$\begin{bmatrix} 1 & 0 & -1 \\ 2 & 0 & -2 \\ 1 & 0 & -1 \end{bmatrix}$$ |
 
 - 경계선 크기 계산
 
   - 픽셀 I(x,y)가 경계선일 가능성의 크기
 
-    - $E(x,y) = \sqrt{E_r^2(x,y)+E_c^2(x,y)}$
+    - $$E(x,y) = \sqrt{E_r^2(x,y)+E_c^2(x,y)}$$
 
     - $E_r(x,y) $: 수평 경계선 검출용 회선 마스크 적용 결과 값
 
@@ -119,6 +121,4 @@ $M = \begin{bmatrix} \frac{1}{25} & \frac{1}{25} & \frac{1}{25} & \frac{1}{25} &
 - 중간값 필터링
   - 임펄스 잡음을 제거하기 위한 효과적인 방법
   - 경계선을 보존 또는 강화
-
-
 
