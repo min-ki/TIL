@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>todo_list page</title>
+    <style>
+
+    </style>
+
+</head>
+
+<body>
+
+    <a href="{% url 'todo:todo_create' %}">todo 추가하기</a>
+
+    <div>
+        <ul>
+            {% for item in todos %}
+            <li>{{ item.todo }} <a href="#">수정</a> <a href="#">삭제</a></li>
+            {% endfor %}
+        </ul>
+    </div>
+</body>
+
+</html>
