@@ -310,7 +310,97 @@ public @interface Bogus {
 
 # Type Annotations and Pluggable Type Systems
 
+자바 8 이전에는, 어노테이션은 선언부에만 사용할 수 있었다. 하지만, 자바 8부터는 어노테이션이 어떠한 타입에도 적용할 수 있게 되었다.
+
+이 말은, 타입을 사용하는 곳은 어디는 어노테이션을 사용할 수 있다는 뜻이다.
+
+Type annotations은 더 강력한 타입 체킹을 할 수 있게 해준다. 예를 들어, `@NonNull` 어노테이션을 사용하면, null이 아닌 타입을 사용할 수 있게 해준다.
+
+```java
+@NonNull String str;
+```
+
+위와 같은 코드를 컴파일할때, 명령어에 `-Xlint:all`을 추가하면, null이 아닌 타입을 사용하지 않았을 때 경고를 준다.
+
+```java
+javac -Xlint:all Test.java
+```
+
+우리는 각기 다른 종류의 에러를 검사하는 여러 타입 검사 모듈을 사용할 수 있다. 이러한 방식을 통해, 자바의 타입 시스템 위에 특정한 검사를 언제, 어디서 원하는 곳에서 할 수 있도록 추가할 수 있다.
+
+타입 어노테이션의 현명한 사용과 pluggable type checkers와 함께라면, 더 강력하고 에러가 덜 발생하는 코드를 작성할 수 있다.
+
+많은 경우에, 우리는 우리의 타입 검사 모듈을 작성하지 않을 것이다. 이미 많은 서드파티 타입 검사 모듈이 존재한다. 예를들어, University of Washington 대학에서 만든 Checker Framework와 같은 것들을 사용하고 싶을 수도 있다. 이 프레임워크는 NonNull 모듈을 포함하고, 뿐만아니라 정규 표현식 모듈, 뮤텍스 락 모듈을 포함한다. 궁금하다면 https://checkerframework.org/ 이걸 읽어보자.
+
 # Repeating Annotations
+
+선언부나, 타입에 동일한 어노테이션을 반복해서 적용하기 원하는 상황이 있을 수 있다. 자바 8부터, repeating annotations은 이것을 가능하게 한다.
+
+첫번 째 예시로, 특정한 시간 혹은 주어진 시간에 메서드를 실행하게 하는 타이머 서비스를 작성하고 있을 때 여러 개의 시간을 적용하고 싶을 수 있을 것이다. 이때 아래와 같이 할 수 있도록 해준다.
+
+```java
+@Schedule(dayOfMonth="last")
+@Schedule(dayOfWeek="Fri", hour="23")
+public void doPeriodicCleanup() { ... }
+```
+
+두번 째 예시로, 권한을 처리하는 경우가 있다.
+
+```java
+@Alert(role="Manager")
+@Alert(role="Administrator")
+public class UnauthorizedAccessException extends Exception { ... }
+```
+
+호환성 문제로 인해, repeating annotations은 자바 컴파일러에 의해 자동으로 생성되는 `container annotation`에 저장되어진다.
+
+컴파일러가 이 작업을 하기 위해서, 두개의 선언부가 코드에서 필요하다.
+
+## Step 1: Declare a Repeatable Annotation Type
+
+```java
+import java.lang.annotation.Repeatable;
+
+@Repeatable(Schedules.class)
+public @interface Schedule {
+    String dayOfMonth() default "first";
+    String dayOfWeek() default "Mon";
+    int hour() default 12;
+}
+```
+
+- `@Repeatable` meta-annotation의 값은 부모, 즉 자바 컴파일러가 repeating annotations을 저장하기 위해 생성해야하는 컨테이너 어노테이션의 타입이다.
+- 이 예제에서는, containing annotation type는 Schedules가 되고, @Schedule 어노테이션이 @Schedules 어노테이션에 저장된다.
+
+## Step 2: Declare the Containing Annotation Type
+
+- containing annotation type은 반드시 array type인 value element를 가져야 한다.
+- array type의 component type은 반드시 repeatable annotation type이 되어야 한다.
+  - 배열 앞에 오는 타입을 컴포넌트 타입이라고 하나보다.
+- `Schedules` containing annotation type을 위한 선언은 다음과 같다.
+
+```java
+public @interface Schedules {
+    Schedule[] value(); // 앞의 Schedule[]이 component type이다.
+}
+```
+
+## Retrieving Annotations (어노테이션 목록을 가져오기)
+
+어노테이션 목록을 획득하기 위해 사용될 수 있는 몇가지 메서드들이 Reflection API에 있다.
+`AnnotatedElement.getAnnotation(Class<T>)` 와 같이, 하나의 어노테이션을 반환하는 메서드들의 동작은 변경되지 않는다. 즉, 요청된 타입의 어노테이션이 있다고, 하나의 어노테이션만 있다면 해당 어노테이션을 반환한다. **만약, 요청된 타입에 어노테이션이 여러 개 있다면, 처음으로 발견된 어노테이션을 반환한다.** 이러한 방식으로, 레거시 코드가 계속해서 동작한다.
+
+한번에 다수의 어노테이션을 반환하기 위한 컨테이너 어노테이션을 통해 스캔을 할 수 있는 다른 메서드들은 자바 8에서 소개되었다.
+
+- `AnnotatedElement.getAnnotationsByType(Class<T>)`
+  - 연결된 어노테이션이 없는 경우 길이가 0인 배열을 반환한다.
+  - https://docs.oracle.com/javase/8/docs/api/java/lang/reflect/AnnotatedElement.html#getAnnotationsByType-java.lang.Class-
+
+## Design Considerations
+
+어노테이션 타입을 디자인할 때, 반드시 타입의 어노테이션들의 카디널리티(cardinality)를 고려해야한다. 즉, 어노테이션 타입이 반복될 수 있는지, 아니면 하나만 존재할 수 있는지를 결정해야한다. 또한, `@Target` meta annotations을 사용해서 어노테이션 타입이 어디에 사용될 수 있는지를 제한할 수 있다.
+
+이러한 디자인 고려사항들을 지키는 것은 프로그래머가 어노테이션을 잘 사용하도록 해줄 수 있다.
 
 # 참고자료
 
