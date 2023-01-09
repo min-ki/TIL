@@ -116,6 +116,13 @@ comp의 transducer 함수의 순서를 기억하자. 이 순서는 스레딩 매
 map cat mapcat filter remove take take-while take-nth drop drop-while replace partition-by partition-all keep keep-indexed map-indexed distinct interpose dedupe random-sample
 ```
 
+## Transducer를 사용하는 것은 무엇이 좋을까?
+
+- efficiency를 향상시켜준다.
+- modular한 방식으로 코드를 더 효율적으로 작성하게 해준다.
+
 ## 참고자료
 
 - https://clojure.org/reference/transducers
+- https://stackoverflow.com/questions/26317325/can-someone-explain-clojure-transducers-to-me-in-simple-terms
+- https://www.youtube.com/watch?v=6mTbuzafcII
