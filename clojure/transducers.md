@@ -116,10 +116,152 @@ comp의 transducer 함수의 순서를 기억하자. 이 순서는 스레딩 매
 map cat mapcat filter remove take take-while take-nth drop drop-while replace partition-by partition-all keep keep-indexed map-indexed distinct interpose dedupe random-sample
 ```
 
+## Using Transducers
+
+Transducers는 많은 상황에서 사용될 수 있다.
+
+### transduce
+
+> One of the most common ways to apply transducers is with the transduce function, which is analogous to the standard reduce function:
+
+transducers를 적용하는 가장 일반적인 방법 중 하나는 `transduce`함수를 사용하는 것이다. 
+`transduce` 함수는 표준 reduce 함수와 유사하다.
+
+```clojure
+(transduce xform f coll)
+(transduce xform f init coll)
+```
+
+> transduce will immediately (not lazily) reduce over coll with the transducer xform applied to the reducing function f, using init as the initial value if supplied or (f) otherwise. 
+
+- transduce는 초기값이 있다면 초기값을 사용하고 아니라면 (f)를 한다.
+- transduce는 lazily하게 처리되지않고, 즉시 f가 적용된 transducer xform과 함께 전체 컬렉션을 reduce 한다.
+
+> f supplies the knowledge of how to accumulate the result, which occurs in the (potentially stateful) context of the reduce.
+
+- f는 reduce 함수가 실행되면서 reduce 함수의 컨텍스트 내에서 결과가 어떻게 누적되어야 하는지에 대한 방법을 알려준다.
+
+```clojure
+(def xf (comp (filter odd?) (map inc)))
+(transduce xf + (range 5))
+;; => 6
+
+(transduce xf + 100 (range 5))
+;; => 106
+```
+
+> The composed xf transducer will be invoked left-to-right with a final call to the reducing function f. In the last example, input values will be filtered, then incremented, and finally summed.
+
+xf transducer는 왼쪽에서 오른쪽으로 호출되고 마지막으로 reducing 함수 f가 호출된다. 마지막 예제에서는 입력값이 필터링되고, 증가되고, 마지막으로 합산된다.
+
+자세히 살펴보자.
+
+```clojure
+1. (range 5) => (0 1 2 3 4)
+
+2. (filter odd?) => (1 3)
+
+3. (map inc) => (2 4)
+
+4. (+) => 6
+```
+
+<img src="https://clojure.org/images/content/reference/transducers/xf.png">
+
+
+## eduction
+
+- education 아니다. `eduction`이다.
+- 라틴어 eductio로부터 파생되었다고 한다.
+- educe + -ion
+- 의미
+  - The act of educing, of deducing: deduction.
+  - 
+
+> To capture the process of applying a transducer to a coll, use the eduction function. 
+
+transducer를 컬렉션에 적용하는 과정을 캡쳐하고 싶다면 `eduction` 함수를 사용하면된다.
+
+> It takes any number of xforms and a final coll and returns a reducible/iterable application of the transducer to the items in coll. 
+
+`eduction` 함수는 xform과 컬렉션을 인자로 받고, transducer를 컬렉션의 아이템에 적용한 reducible/iterable을 반환한다.
+
+> These applications will be performed each time reduce/iterator is called.
+
+`reduce/iterator`가 호출될 때마다 이러한 애플리케이션이 수행된다.
+(왜 애플리케이션이라고 표현했지? 어떤 과정을 관찰해주기때문에 애플리케이션이라고 표현한건가?)
+
+```clojure
+user=> (def iter (eduction xf (range 5)))
+;; => #'user/iter
+
+user=> iter
+;; => (2 4)
+
+user=> (reduce + 0 iter)
+;; => 6
+```
+
+위 예시에서 보듯이, 중간에 xform이 적용된 컬레션의 형태를 볼 수 있다.
+
+## into
+
+> To apply a transducer to an input collection and construct a new output collection, use into (which efficiently uses reduce and transients if possible):
+
+transducer에 입력 컬렉션을 적용하고, 새로운 컬렉션을 생성하려면 `into`를 사용하면 된다.
+
+```clojure
+(into [] xf (range 1000))
+```
+
+## sequence
+
+> To create a sequence from the application of a transducer to an input collection, use sequence:
+
+입력 컬렉션에 대한 transducer의 적용 결과를 시퀀스로 생성하려면 `sequence`를 사용하면 된다.
+
+```clojure
+(sequence xf (range 1000))
+```
+
+> The resulting sequence elements are incrementally computed. 
+시퀀스 요소들의 결과는 증분적으로 계산된다.
+
+> These sequences will consume input incrementally as needed and fully realize intermediate operations. 
+
+이 시퀀스들은 필요할 때마다 입력을 증분적으로 소비하고 중간 연산을 완전히 실현한다.
+
+> This behavior differs from the equivalent operations on lazy sequences.
+
+이러한 동작방식은 lazy 시퀀스에서 동일한 연산과는 다르다.
+
+## Creating Transducers
+
+## Creating Transducible Processes
+
+> Transducers are designed to be used in many kinds of processes. 
+
+Transducers는 다양한 프로세스에서 사용될 수 있도록 디자인 되었다.
+
+A transducible process is defined as a succession of steps where each step ingests an input. 
+
+`transducible` 프로세스는 각 단계에서 입력을 소비하는 순차적인 단계로 정의된다.
+
+The source of the inputs is specific to each process (from a collection, an iterator, a stream, etc). 
+
+입력 소스는 각 프로세스에 따라 다르다. (컬렉션, 이터레이터, 스트림 등)
+
+Similarly, the process must choose what to do with the outputs produced by each step.
+
+비슷하게, 프로세스는 반드시 각 단계에서 생성된 출력물을 어떻게 처리할지 선택해야 한다.
+
+
 ## Transducer를 사용하는 것은 무엇이 좋을까?
 
 - efficiency를 향상시켜준다.
 - modular한 방식으로 코드를 더 효율적으로 작성하게 해준다.
+
+
 
 ## 참고자료
 
