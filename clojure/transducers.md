@@ -61,7 +61,8 @@ For example:
 위의 예시는 시퀀스 함수에 보통 사용하는 함수에서 뒤에 collection을 생략한 것이다.
 
 > Transducers compose with ordinary function composition.
-> Transducer는 일반적인 함수의 조합과 같이 조합된다.
+
+Transducer는 일반적인 함수의 조합과 같이 조합된다.
 
 > A transducer performs its operation before deciding whether and how many times to call the transducer it wraps.
 
@@ -237,21 +238,64 @@ transducer에 입력 컬렉션을 적용하고, 새로운 컬렉션을 생성하
 
 ## Creating Transducers
 
+> Transducers have the following shape (custom code in "..."):
+
+Transducers는 다음 모양을 가진다.
+
+```clojure
+(fn [rf]
+  (fn ([] ...)
+      ([result] ...)
+      ([result input] ...))
+```
+
+> Many of the core sequence functions (like map, filter, etc) take operation-specific arguments (a predicate, function, count, etc) and return a transducer of this shape closing over those arguments. 
+
+map, filter 등과 같은 코어 시퀀스 함수들은 연산에 특화된 인자 (predicate, function, count 등)을 받고, 이러한 인자를 위와 같은 모양의 transducer로 반환한다.
+
+> In some cases, like cat, the core function is a transducer function and does not take an rf.
+
+몇가지 경우에 대해서는, cat과 같이 코어 함수가 transducer 함수이고 rf를 받지 않는다.
+
+위와 같이 inner function은 각기 다른 목적을 위해 3개의 arity를 가진다.
+
+1. arity 0 (Init) : nested transform rf의 init arity를 호출해야 한다. 이는 transducing process를 호출하기 위해 사용된다.
+2. arity 1 (Completion) : 
+3. arity 2 (Step) : 
+
+
+
+- Step (arity 2) - this is a standard reduction function but it is expected to call the rf step arity 0 or more times as appropriate in the transducer. For example, filter will choose (based on the predicate) whether to call rf or not. map will always call it exactly once. cat may call it many times depending on the inputs.
+
+- Completion (arity 1) - some processes will not end, but for those that do (like transduce), the completion arity is used to produce a final value and/or flush state. This arity must call the rf completion arity exactly once.
+
+An example use of completion is partition-all, which must flush any remaining elements at the end of the input. The completing function can be used to convert a reducing function to a transducing function by adding a default completion arity.
+
+### Early termination
+
+클로저는 reduce의 조기 종료를 위한 메커니즘을 제공한다.
+
+- `reduced`  : takes a value and returns a reduced value indicating reduction should stop
+- `reduced?` : 값이 reduced로 생성되었다면 true를 반환
+- `deref` or `@` : reduced 내부의 값을 반환 (?? 뭔말이지)
+
+transducer를 사용하는 프로세스는 step 함수가 reduced 값을 반환할 때 중지하고 반드시 검사해야한다. 게다가, 중첩된 reduce를 사용하는 transducer step 함수는 reduced 값을 만났을 때 반드시 검사하고 전달해야 한다. (cat의 구현을 참고하라)
+
 ## Creating Transducible Processes
 
 > Transducers are designed to be used in many kinds of processes. 
 
 Transducers는 다양한 프로세스에서 사용될 수 있도록 디자인 되었다.
 
-A transducible process is defined as a succession of steps where each step ingests an input. 
+> A transducible process is defined as a succession of steps where each step ingests an input. 
 
 `transducible` 프로세스는 각 단계에서 입력을 소비하는 순차적인 단계로 정의된다.
 
-The source of the inputs is specific to each process (from a collection, an iterator, a stream, etc). 
+> The source of the inputs is specific to each process (from a collection, an iterator, a stream, etc). 
 
 입력 소스는 각 프로세스에 따라 다르다. (컬렉션, 이터레이터, 스트림 등)
 
-Similarly, the process must choose what to do with the outputs produced by each step.
+> Similarly, the process must choose what to do with the outputs produced by each step.
 
 비슷하게, 프로세스는 반드시 각 단계에서 생성된 출력물을 어떻게 처리할지 선택해야 한다.
 
