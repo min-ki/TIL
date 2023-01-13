@@ -6,9 +6,7 @@
 
 promesa 공식문서에서 promise를 다음과 같이 정의하고 있다.
 
-> promise는 비동기 작업의 결과를 나타내는 **추상화**이며, **에러에 대한 개념**을 가지고 있다.
-
-
+> promise는 비동기 작업의 결과를 나타내는 **추상화**이며, **에러 개념**을 가지고 있다.
 
 JVM에서는 `CompletebleFuture`를, JS에서는 `Promise`를 사용한다.
 
@@ -23,7 +21,7 @@ promise의 상태가 resolved 혹은 rejected 되었을 때 이것은 `done` 이
 
 > NOTE: 많은 부분들이 런타임에 상관없이 동일하게 동작하지만, 플랫폼에 따라 한계들이 존재한다.
 
-### Creating a Promise
+## Creating a Promise
 
 promise instance를 만드는 다양한 방법이 있다. plain value를 가지는 promise를 만들기 원한다면, polymorphic `promise` 함수를 사용하면 된다.
 
@@ -148,6 +146,50 @@ do가 하나 이상의 식을 포함한다면, 각 식은 promise 식으로 간�
 4. `p/create`를 사용해서 promise를 생성한다. 자바스크립트와 유사하게 생겼다는 점이 있으며 동기적으로 실행된다는 점을 유심히 보자. 비동기적으로 실행하고 싶다면 executor를 전달하는 방법이 있다.
 
 5. `p/do`를 사용해서 promise를 생성한다. 클로저의 do 블록과 유사하게 동작한다. 마지막 식의 결과값이 반환값이 된다. 이 식은 plain value가 될 수도 있고 또다른 promise가 될 수도 있다.
+
+
+## Chaining computations
+
+이 섹션은 promesa가 제공하는 다른 연산들을 연속적으로 실행하는데 도움을 주는 매크로와 헬퍼들에 대해서 설명한다.
+
+### `then`
+
+The most common way to chain a transformation to a promise is using the general purpose then function. Consists on applying the function
+
+```clojure
+@(-> (p/resolved 1)
+     (p/then inc))
+
+;; => 2
+
+;; flatten result
+@(-> (p/resolved 1)
+     (p/then (fn [x] (p/resolved (inc x)))))
+
+;; => 2
+```
+
+As you can observe in the example, then handles functions that return plain values as well as promise instances (which will automatically be flattened).
+
+위의 예에서 보듯이, `then`은 plain value를 반환하는 함수 뿐만 아니라 promise 인스턴스를 반환하는 함수도 처리한다. (자동으로 평탄화된다.)
+퍼포먼스에 민감한 코드를 위해서는, `map`이나 `mapcat`과 같은 더 구체적인 함수를 사용하는 것이 좋다.
+
+### `chain`
+If you have multiple transformations and you want to apply them in one step, there are the chain and chain' functions:
+
+여러개의 변환을 하나의 스텝에서 적용하고 싶다면, `chain` 과 `chain'` 함수를 사용하면 된다.
+
+```clojure
+(def result
+  (-> (p/resolved 1)
+      (p/chain inc inc inc)))
+
+@result
+;; => 4
+```
+
+> NOTE: chain은 then, then'과 유사하지만 여러개의 변환 함수를 인자로 받는다.
+
 
 
 # 참고자료
