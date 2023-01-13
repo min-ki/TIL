@@ -152,9 +152,9 @@ do가 하나 이상의 식을 포함한다면, 각 식은 promise 식으로 간�
 
 이 섹션은 promesa가 제공하는 다른 연산들을 연속적으로 실행하는데 도움을 주는 매크로와 헬퍼들에 대해서 설명한다.
 
-### `then`
+### then
 
-The most common way to chain a transformation to a promise is using the general purpose then function. Consists on applying the function
+promise에 변환을 체이닝하기위한 가장 일반적인 방법은 범용 목적인 `then` 함수를 사용하는 것이다.
 
 ```clojure
 @(-> (p/resolved 1)
@@ -169,14 +169,10 @@ The most common way to chain a transformation to a promise is using the general 
 ;; => 2
 ```
 
-As you can observe in the example, then handles functions that return plain values as well as promise instances (which will automatically be flattened).
-
 위의 예에서 보듯이, `then`은 plain value를 반환하는 함수 뿐만 아니라 promise 인스턴스를 반환하는 함수도 처리한다. (자동으로 평탄화된다.)
 퍼포먼스에 민감한 코드를 위해서는, `map`이나 `mapcat`과 같은 더 구체적인 함수를 사용하는 것이 좋다.
 
-### `chain`
-If you have multiple transformations and you want to apply them in one step, there are the chain and chain' functions:
-
+### chain
 여러개의 변환을 하나의 스텝에서 적용하고 싶다면, `chain` 과 `chain'` 함수를 사용하면 된다.
 
 ```clojure
@@ -190,6 +186,118 @@ If you have multiple transformations and you want to apply them in one step, the
 
 > NOTE: chain은 then, then'과 유사하지만 여러개의 변환 함수를 인자로 받는다.
 
+### `->`, `->>`, `as->` 매크로
+
+`->`와 `->>`는 6.1.431 버전에서 추가되었다. `as->`는 6.1.434 버전에서 추가되었다.
+
+스레딩 매크로는 매번 `then`을 사용하는 것 대신에, 체이닝 연산을 더 간결하게 만들어준다.
+
+아래 예제에서 `then`을 사용하는 것과 `->`를 사용하는 것을 비교해보자.
+
+```clojure
+(-> (p/resolved {:a 1 :c 3})
+    (p/then #(assoc  % :b 2))
+    (p/then #(dissoc % :c )))
+```
+
+다음은, `->`를 사용해서 위의 코드를 더 간결하게 만든 것이다. then이 생략되었고, 매번 체이닝 연산마다 then을 사용하지 않아도 된다.
+
+```clojure
+(p/-> (p/resolved {:a 1 :c 3})
+      (assoc :b 2)
+      (dissoc :c))
+```
+
+`->>`와 `as->`는 clojure.core 매크로와 동일하지만, promise와 함께 동작한다는 점에서 다르다.
+
+### handle
+
+하나의 단일 콜백에서 `rejected` 혹은 `resolved` 콜백을 처리하고싶다면, `handle` 함수를 사용하면 된다.
+
+```clojure
+(def result
+  (-> (p/promise 1)
+      (p/handle (fn [result error]
+                   (if error :rejected :resolved)))))
+
+@result
+;; => :resolved
+```
+
+위의 handle은 then과 같이 동일하게 동작한다. 만약 함수가 promise를 반환한다면, 자동으로 unwrapped된다.
+
+여기서, unwrapped된다는 것은, promise를 반환했지만 result와 error로 자동으로 분리된다는 것을 의미한다.
+
+### finally
+
+finally 함수는 promise가 resolved되거나 rejected되었을 때, 항상 실행되는 함수를 제공한다. (사이드 이펙트가 있을 수 있다.)
+
+```clojure
+(def result
+  (-> (p/promise 1)
+      (p/finally (fn [_ _]
+                   (println "finally")))))
+
+@result
+;; => 1
+;; => stdout: "finally"
+```
+
+위의 예제에서, 마지막에 finally 함수가 실행되고 반환되지만, finally의 반환은 무시된다. 그리고, 새로운 promise 인스턴스가 finally 이전의 원래의 것을 미러링해서 반환한다.
+
+### map
+
+최종적으로 resolved된 promise의 값에 함수를 적용한 값을 가지는 새로운 promise 인스턴스를 반환한다.
+
+```clojure
+(def result
+  (->> (p/resolved 1)
+       (p/map inc)))
+
+@result
+;; => 2
+```
+
+then과는 대조적으로, nested promise를 자동으로 unwrapping을 해주지 않는다.
+unwrapping을 하고싶다면 `mapcat` 을 사용하면 된다.
+
+### mapcat
+
+map과 동일하게 함수를 적용한 값과함께 새로운 promise 인스턴스를 반환한다.
+map과 다른점은 map은 값을 반환하지만, mapcat은 promise를 반환한다는 점이다.
+
+```clojure
+(def result
+ (->> (p/resolved 1)
+      (p/mapcat (fn [v] (p/resolved (inc v))))))
+```
+
+### hmap
+
+map과 동일한 방식으로 함수를 적용한다. 다만, 함수의 인자는 resolved된 값과 error를 받는다.
+위의 mapcat 예제에서는 mapcat의 함수로 resolved된 값만 받았지만, hmap은 resolved된 값과 error를 받는다. 함수의 반환 값으로 완료될 promise를 반환받는다.
+
+```clojure
+(def result
+  (->> (p/resolved 1)
+       (p/hmap (fn [v _error] (inc v)))))
+
+@result
+;; => 2
+```
+
+### hcat
+
+mapcat과 동일한 방식으로 함수를 적용한다. 다만, 함수의 인자는 resolved된 값과 error를 받는다. 함수는 반드시 promise를 반환해야한다.
+
+```clojure
+(def result
+  (->> (p/resolved 1)
+        (p/hcat (fn [v _] (p/resolved (inc v))))))
+
+@result
+;; => 2
+```
 
 
 # 참고자료
