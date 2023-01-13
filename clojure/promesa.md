@@ -260,13 +260,11 @@ finally 함수의 내부를 보면서 자세히 살펴보자.
 ```clojure
 (extend-protocol pt/IPromise
   CompletionStage
-  
   ...
-
   (-finally
     ([it f]
     (.whenComplete ^CompletionStage it
-                    ^BiConsumer (pu/->Consumer2 f))) ;; ->Consumer2는 deftype
+                    ^BiConsumer (pu/->Consumer2 f))) ;; ->Consumer2는 deftype으로 정의되어있어 ->Consumer2와 같은 생성자를 가진다.
 
     ([it f executor]
     (.whenCompleteAsync ^CompletionStage it
@@ -274,9 +272,12 @@ finally 함수의 내부를 보면서 자세히 살펴보자.
                         ^Executor (exec/resolve-executor executor)))))
 ```
 
-위의 코드는 pt/-finally 프로토콜의 구현부이다. Java의 CompletionStage 인터페이스를 구현한 promise 인스턴스 (CompletableFuture)를 받아서, whenComplete 함수에 BiConsumer를 전달한다.
+위의 코드는 프로토콜의 구현부이다. finally는 Java의 CompletionStage 인터페이스를 구현한 promise 인스턴스 (CompletableFuture)를 받아서, 인스턴스 메서드인 whenComplete 함수에 f를 전달한다. 여기서 f는, finally 에서 실행하려고하는 액션(함수)이다.
 
-.whenComplete 함수의 인터페이스는 다음과 같다. `whenComplete(BiConsumer<? super T,? super Throwable> action)`
+f를 전달해주는 Consumer2는 BiConsumer를 구현한 함수형 인터페이스이다.
+.whenComplete 함수의 인터페이스는 다음과 같다. 
+
+> `whenComplete(BiConsumer<? super T,? super Throwable> action)`
 
 이 인터페이스는 두개의 인자를 받고 결과는 반환하지 않는 함수형 인터페이스이다. 다른 함수형 인터페이스와 다르게 BiConsumer는 사이드 이펙트를 기대한다.
 
@@ -287,17 +288,21 @@ finally 함수의 내부를 보면서 자세히 살펴보자.
 it.whenComplete(action) ;; 위의 코드는 다음과 같이 이해하면 된다.
 ```
 
-위의 함수 호출예시는 clojure java interop을 사용해서, whenComplete 함수를 호출하는 것이다.
+위의 함수 호출예시는 자바 인터롭을 사용해서, 인스턴스 메서드인 whenComplete 함수를 호출하는 것이다.
 
 > java interop은 다음과 같이 사용할 수 있다. `(.instanceMember instance args*)`
 
-위에서는 it이 CompletionStage 인터페이스를 구현한 CompletableFuture의 인스턴스이다. 그리고, whenComplete 함수를 호출하면서, BiConsumer를 전달한다.
+위에서 it이 CompletionStage 인터페이스를 구현한 CompletableFuture의 인스턴스이다. promesa에서 promise와 동일한 것이다.
 
-그리고 finally는 원래의 promise를 반환한다고 하는데, whenComplete를 조금더 자세히 봐보자.
+마지막으로 finally가 원래의 promise를 미러링을 어떻게 하는지 알아보자. 이를 위해서, whenComplete의 함수 정의를 살펴보자.
 
-`CompletableFuture<T>	whenComplete(BiConsumer<? super T,? super Throwable> action)`
+> `CompletableFuture<T>	whenComplete(BiConsumer<? super T,? super Throwable> action)`
 
-현재 스테이지가 완료되면, 인자로 전달된 action을 실행합니다. 현재 스테이지와 같은 결과 혹은 예외와 함께 새로운 CompletionStage를 반환합니다. 이를 통해서 finally가 미러링되는 동작을 확인할 수 있습니다.
+이 함수의 설명은 문서에 따르면 다음과 같다. 
+
+*현재 스테이지가 완료되면, 인자로 전달된 action을 실행합니다. 현재 스테이지와 같은 결과 혹은 예외와 함께 새로운 CompletionStage를 반환합니다. 이를 통해서 finally가 미러링되는 동작을 확인할 수 있습니다.*
+
+즉, 요약하자면 whenComplete는 consumer를 받아서 소비하고, 자기 스스로를 복사해 새로운 인스턴스를 생성해서 반환한다.
 
 ### map
 
