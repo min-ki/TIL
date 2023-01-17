@@ -1,5 +1,7 @@
 # Amazon dynamodb under the hood how we built a hyper scale database
 
+- https://www.youtube.com/watch?v=yvBR71D0nAQ&t=
+
 ## Onboarding to Amazon DynamoDB
 
 - How dyanmodb works
