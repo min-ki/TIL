@@ -72,6 +72,62 @@
 
 ## 제약 조건
 
+### 스케일링
+
+<img src="images/quota.jpg">
+
+- RDBMS와 다르게 쓰기/읽기를 독립적으로 사용할 수 있다.
+
+<img src="images/quota2.jpg">
+
+- DynamoDB는 아이템이 한글자만 바뀌어도 다시쓴다.
+- 가능한 아이템의 사이즈는 적게 유지하고, 아이템의 사이즈를 늘리는 것이 좋다.
+- DynamoDB가 잘하는 것은 PK, SK를 사용해서 특정 아이템을 찾는 것을 잘한다.
+
+<img src="images/dynamodb-read-data.jpg">
+
+- DynamoDB는 REST API를 통해서 데이터를 읽어온다.
+- 데이터 -> 데이터 스토어의 역할로 볼 수 있다.
+- GetItem
+  - 10KB의 한개 아이템을 Eventually Consistency로 읽는다면 2RCU를 사용한다.
+
+<img src="images/dynamodb-api-scan.jpg">
+
+- RDBMS의 full scan과 같다고 보면 된다.
+- DynamoDB는 1MB씩 읽는게 가능하고 토큰값을 이용해 계속해서 읽을 수 있다.
+- 마이그레이션할때 사용할만한 API
+
+<img src="images/dynamodb-api-constraint.jpg">
+
+- bulk 작업보다는 여러시점에 나눠서 일어나는 작업이 더 좋다.
+
+<img src="images/dynamodb-datatype.jpg">
+
+- Transact로 시작하는 Operations은 RDBMS의 Transaction과 비슷하다.
+  - RCU, WCU가 2배이상 사용되기 때문에 최소한으로 사용하는 것이 중요하다.
+
+### GSI (Global Secondary Index)
+
+<img src="images/dynamodb-gsi.jpg">
+
+- RDBMS의 대표적인 기능이지만 NoSQL이 닮아가고싶은 Secondary Index
+- 추가나 삭제가 자유롭다.
+- 그래서 서비스 요구사항 등에 따라 검색 등이 필요할 떄 GIS를 사용할 수 있다.
+
+### LSI (Local Secondary Index)
+
+<img src="images/dynamodb-local-secondary-index.jpg">
+
+- GSI랑 다르게 테이블을 생성하는 시점에서만 생성이 가능하다. 그리고 삭제가 불가능하다.
+- 그래서 일반적으로는 사용을 권장하지는 않는다.
+
+### LSI VS GSI
+
+<img src="images/lsi_vs_gsi.jpg">
+
+- **LSI는 Strong Consistency가 필요하다면 사용을 고려해볼 수 있다.**
+- 가능하다면 Secondary Index를 가능하다면 줄이면 좋다. 왜나하면, 비용이 들기 때문이다.
+
 ## Tenet
 
 ## 디자인 패턴 및 비정규화
