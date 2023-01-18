@@ -130,6 +130,49 @@
 
 ## Tenet
 
+<img src="images/sql_vs_nosql_design_pattern.jpg">
+
+- RDBMS처럼 Entity 별로 테이블을 만들지 말자.
+- 최대한 빠르게 조회할 수 있도록 키를 디자인하자.
+
+<img src="images/dynamodb_data_modeling_tenet.jpg">
+
+- 이번 웨비나에서 가장 중요한 한장
+- Use Case를 정의
+- full serverless 환경
+- DynamoDB에서는 하나의 테이블을 사용하는 것이 여러개로 나뉜 테이블을 사용하는 것보다 좋다.
+- OLTP 환경이 더 적합. OLAP 분석은 DynamoDB 웹으로 분석 파이프라인을 만들어서 수행해야한다.
+
 ## 디자인 패턴 및 비정규화
 
-## 싱글 테이블 디자인 예제
+### 비정규화
+
+<img src="images/denormalization.jpg">
+
+- 비정규화란 데이터 중복을 최소화하는 정규화와 반대되는 개념
+- 예전에는 CPU 비용보다 디스크 비용이 더 비싸기 때문에 정규화를 했었다.
+
+### PK + SK 복합키
+
+<img src="images/dynamodb_composition_key.jpg">
+
+<img src="images/dynamodb_composition_key_example.jpg">
+
+- 위의 예시에서 Partition Key는 FirstName이고 Sort Key는 LastName이다.
+- 하나의 Partition Key에 여러 개의 Sort Key가 결합될 수 있다.
+
+<img src="images/dynamodb_composition_key_example2.jpg">
+
+- key 디자인 시 생각해볼 포인트는 내가 보여줄 UI를 그대로 저장하는 것이다.
+- UI에 따라 데이터 액세스 패턴이 달라지기 때문이다.
+
+### 싱글 테이블 디자인
+
+<img src="images/single-table-design.jpg">
+
+- 애플리케이션의 모든 엔티티를 하나의 테이블에서 접근할 수 있도록 하는 것
+- **시계열, 다른 액세스 패턴**의 엔티티는 적합하지 않다.
+
+<img src="images/dynamodb-anti-patterns.jpg">
+
+- 엔티티 별로 테이블을 만들면 운영비용이 결국 증가해서 관리형을 사용하는 이유가 없어진다.
