@@ -6,7 +6,7 @@
 
 ### Table Structure
 
-<img src="table-structure.jpg">
+<img src="images/table-structure.jpg">
 
 - 가장 큰 단위는 테이블
 - 하나의 테이블에는 무한대에 가까운 아이템을 넣을 수 있다. (RDBMS의 row)
