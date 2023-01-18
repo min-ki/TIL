@@ -21,7 +21,7 @@
 
 ### Primary Key
 
-<img src="pirmary-key.jpg">
+<img src="images/primary-key.jpg">
 
 - PK + SK를 합쳐서 Primary Key라고 한다.
 - 오직 Primary Key로만 검색이 가능하다. (Scan은 제외)
@@ -29,7 +29,7 @@
 
 ### 데이터베이스 스케일링
 
-<img src="database-scaling.jpg">
+<img src="images/database-scaling.jpg">
 
 - 전통적인 RDBMS는 보통 스케일업
 - NoSQL은 많은 샤드로 스케일 아웃 전략을 사용
