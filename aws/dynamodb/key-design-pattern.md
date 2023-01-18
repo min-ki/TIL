@@ -58,11 +58,11 @@
 
 ### 아이템 분포 (이상적 경우)
 
-<img style="float:left;" src="images/item-distribution-1.jpg" width="50%">
-<img style="float:right;" src="images/item-distribution-2.jpg" width="50%">
+<img src="images/item-distribution-1.jpg">
+<img src="images/item-distribution-2.jpg">
 
 - PK는 OrderId
-- DynamoDB는 PK를 해싱해서 파티션에 저장한다. 이를 통해서, PK가 파티션에 골고루 분포되도록 할 수 있다. 여러 개의 파티션에 나누어 저장하려고 하는 것
+- 단순히 1,2,3 을 통해서 파티션을 분할한다면 1번 파티션에 모든 데이터가 저장된다. 나머지 파티션은 놀게 되므로 비효울적이 된다. 그래서 DynamoDB는 PK에 해시함수를 적용해서 파티션을 선택하여 저장한다.
 
 ### 데이터 복제
 
