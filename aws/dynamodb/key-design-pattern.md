@@ -34,6 +34,42 @@
 - 전통적인 RDBMS는 보통 스케일업
 - NoSQL은 많은 샤드로 스케일 아웃 전략을 사용
 
+### 작업 방식
+
+<img src="images/table-automatically-managed.jpg">
+
+- 테이블 단위로 작업을 하면 DynamoDB가 내부적으로 나머지를 알아서 잘 처리한다.
+
+  - 여러 파티션에 나누어서 저장하고, 이러한 파티션의 관리는 DynamoDB가 알아서 해준다.
+
+- 각 파티션이란 단위는 다음과 같은 제약사항을 가진다.
+  - 초당 1000개의 쓰기 (1K WCU)
+  - 초당 3000개의 읽기 (3K RCU)
+  - 10GB의 데이터 저장만 가능
+  - **Key Design 할때 기억해야할 중요한 조건 중 하나이다.**
+
+### 수평적 스케일링
+
+<img src="images/horizontal-scale-out.jpg">
+
+- 트래픽이 증가하면서 파티션의 개수가 늘어난다.
+  - 각 파티션은 제약사항이 있으므로 처리량은 늘어날 수 없다.
+- **여러 개의 파티션이 골고루 사용될 수 있도록 키를 디자인하는 점이 중요하다.**
+
+### 아이템 분포 (이상적 경우)
+
+<img style="float:left;" src="images/item-distribution-1.jpg" width="50%">
+<img style="float:right;" src="images/item-distribution-2.jpg" width="50%">
+
+- PK는 OrderId
+- DynamoDB는 PK를 해싱해서 파티션에 저장한다. 이를 통해서, PK가 파티션에 골고루 분포되도록 할 수 있다. 여러 개의 파티션에 나누어 저장하려고 하는 것
+
+### 데이터 복제
+
+<img src="images/data-replication.jpg">
+
+- 파티션은 3개의 가용영역(AZ)에 복제된다.
+
 ## 제약 조건
 
 ## Tenet
