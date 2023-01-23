@@ -137,3 +137,18 @@ DynamoDB는 `Auto Admin`이라고 부르는 컴포넌트를 가지고 있다. Au
 
 <img src="images/partition-repair.jpg">
 또 다른 역할 하나는, partition repair (파티션 수리)이다. auto admin은 DynamoDB의 모든 컴포넌트 혹은 모든 스토리지 노드를 모니터링하고 만약 장애가 발견된다면 auto admin job은 다른 storage node로 데이터를 복사한다. 정확히는 replication log를 복사하고, replication log를 통해 B tree를 복사한다. 이러한 프로세스가 마무리되면, 새로운 노드는 리더 노드를 따라잡아야한다.
+
+### Secondary Index
+
+<img src="images/secondary-index-update-mechanism.jpg">
+
+- 독립적인 프로세스인 `log propagator`가 storage node의 replication log를 읽어서 secondary index를 업데이트한다.
+
+<img src="images/secondary-index-update-mechanism-2.jpg">
+
+- 속성 중 하나를 예로 들어 Bob이라는 값을 Robert로 변경할 때 기존 값은 삭제를 하고 새로운 장소에 다시 쓰기를 한다.
+
+### Auto Admin
+
+- the heart of DynamoDB
+- DynamoDB의 DBA라고 부른다고 한다.
