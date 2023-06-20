@@ -32,6 +32,139 @@ CREATE TABLE myapp_person(
 
 - 테이블의 이름은 myapp_person인데, 모델의 메타데이터로부터 자동으로 생성되었다. 오버라이드 할 수 있다- 위 예시는 PostgreSQL 문법을 사용했는데, Django는 settings 파일에 명시된 데이터베이스 기반으로 생성해낸다
 
+
+## Using models
+
+모델을 정의하고 나면, Django에게 이 모델을 사용할 것이라고 말해줘야한다. 이렇게 하려면 settings file의 `INSTALLED_APPS` 설정에 models.py이 포함된 모듈의 이름을 추가하면 된다.
+
+```PYTHON
+INSTALLED_APPS = [
+    # ...
+    "myapp",
+    # ...
+]
+```
+
+INSTALLED_APPS에 새로운 앱을 추가하면, `manage.py makemigrations`를 통해서 마이그레이션 파일을 만들고  `manage.py migrate`를 실행해야한다
+
+## Fields
+
+- 모델에서 가장 중요한 부분
+- 필드는 클래스의 속성으로 정의한다.
+- 모델의 API와 충돌할 수 있는 **clean**, **save**, **delete**와 같은 이름을 선택하지 않도록 주의해야한다.
+
+```python
+from django.db import models
+
+
+class Musician(models.Model):
+    first_name = models.CharField(max_length=50)
+    last_name = models.CharField(max_length=50)
+    instrument = models.CharField(max_length=100)
+
+
+class Album(models.Model):
+    artist = models.ForeignKey(Musician, on_delete=models.CASCADE)
+    name = models.CharField(max_length=100)
+    release_date = models.DateField()
+    num_stars = models.IntegerField()
+```
+
+### Field types
+
+모델의 각 필드는 적절한 **Field** 클래스의 인스턴스가 되어야한다. Django는 Field 클래스의 타입을 이용해 몇가지를 결정하는데 사용한다.
+- 데이터베이스의 타입을 어떤 것으로 선택할지 선택하는 결정에 필요
+- form 필드를 렌더링할 때 사용되기 위한 HTML 위젯을 선택하는데 필요
+- 장고 어드민과 자동 생성된 폼에서 유효성 검증을 하기 위해 필요
+
+장고는 많은 내장 타입을 제공하므로 필드의 클래스를 선택하기 위해서 [모델 필드 타입 레퍼런스](https://docs.djangoproject.com/en/4.2/ref/models/fields/#model-field-types)를 잘 읽어보자.
+
+### Field options
+
+각 필드마다 자신의 인자 집합을 취한다. 예를들어, CharField는 VARCHAR 의 사이즈를 결정하기 위해서 max_length 인자를 필요로 한다.
+
+그리고 모든 필드 타입에서 사용될 수 있는 공통의 인자 집합이 있다. 공통 인자의 집합은 모두 선택적이다. 공통 인자의 [레퍼런스](https://docs.djangoproject.com/en/4.2/ref/models/fields/#common-model-field-options)를 확인해보자.
+
+여기서는 간단하게 자주 사용되는 몇 가지만 알아보자.
+
+1. null
+True라면, Django는 데이터베이스에 빈 값을 NULL로 저장한다. 기본값은 False 이다.
+
+2. blank
+True라면, 필드가 blank가 되는 것을 허용한다.
+
+위의 두개를 잘 구분하는 것이 중요하다. null은 순수하게 데이터베이스와 관련된 것이고, blank는 유효성 검사와 관련있는 것이다. 예를들어, blank=True라면, 폼 유효성 검사에서 빈 값을 허용한다는 것이다. 만약 blank=False라면, 필드는 필수가 된다.
+
+3. choices
+
+2개의 요소로 구성된 시퀀스이다.
+
+```python
+YEAR_IN_SCHOOL_CHOICES = [
+    ("FR", "Freshman"),
+    ("SO", "Sophomore"),
+    ("JR", "Junior"),
+    ("SR", "Senior"),
+    ("GR", "Graduate"),
+]
+```
+
+> choices의 순서가 변경되면 새로운 마이그레이션이 생긴다.
+
+튜플의 첫 번째 요소는 데이터베이스에 저장되는 값이다. 두 번째 요소는 필드의 폼 위젯에서 보여지는 값입니다.
+
+모델의 인스턴스가 주어지면, choices가 필드에 보여지는 값은 `get_FOO_display()` 메서드를 사용해서 접근할 수 있습니다. (FOO는 속성이름) 예를들어 다음과 같습니다.
+
+```python
+from django.db import models
+
+
+class Person(models.Model):
+    SHIRT_SIZES = [
+        ("S", "Small"),
+        ("M", "Medium"),
+        ("L", "Large"),
+    ]
+    name = models.CharField(max_length=60)
+    shirt_size = models.CharField(max_length=1, choices=SHIRT_SIZES)
+```
+
+```shell
+>>> p = Person(name="Fred Flintstone", shirt_size="L")
+>>> p.save()
+>>> p.shirt_size
+'L'
+>>> p.get_shirt_size_display()
+'Large'
+```
+
+열거 클래스를 사용해서 choices를 간결하게 정의하는 방법도 있습니다.
+
+```python
+from django.db import models
+
+
+class Runner(models.Model):
+    MediaType = models.TextChoices("MedalType", "GOLD SILVER BRONZE")
+    name = models.CharField(max_length=60)
+    medal = models.CharField(blank=True, choices=MedalType.choices, max_length=10)
+```
+
+4. default
+
+필드의 기본 값을 설정합니다. 값 또는 호출가능한 객체(callable)가 될 수 있습니다. 호출가능한 객체라면 새로운 객체가 생성될때마다 호출됩니다.
+
+5. help_text
+
+폼 위젯에 help 텍스트로 보여지는 값입니다. 폼을 사용하지 않는다면 문서화로 사용해도 좋습니다.
+
+6. primary_key
+
+True라면, 이 필드는 모델의 primary key 입니다. 만약 모델의 어떠한 필드에도 primary_key를 명시하지 않는다면 Django는 자동으로 IntegerField를 primary key로 추가합니다.
+
+7. unique
+True라면, 필드는 테이블에서 유일한 값이어야합니다.  
+
 ## Reference
 
 - [django db model](https://docs.djangoproject.com/en/4.2/topics/db/models/)
