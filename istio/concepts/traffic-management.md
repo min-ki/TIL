@@ -26,16 +26,24 @@ istio의 트래픽 관리 모델은 서비스들과 함께 배포되는 Envoy라
 
 트래픽 관리 리소스들은 다음과 같다.
 
-- Virtual Services
+- 가상 서비스 (Virtual Services)
 - Destination rules
 - Gateways
 - Servie entries
 - Sidecars
 
-## Virtual Services
+## 가상 서비스(Virtual Services)
 
-virtual services는 destination rule와 함께 istio의 트래픽 라우팅 기능의 핵심이다.
-virtual services는 요청이 istio 서비스 메시 내의 서비스로 어떻게 라우팅되는지를 정의한다. 각 virtual service는 라우팅 규칙들의 집합으로 구성되는데 규칙들은 istio가 주어진 요청에 대해 일치하는 virtual service를 찾아 실제 목적지를 찾을 때가지 정의된 순서대로 평가한다.
+가상 서비스는 destination rule와 함께 istio의 트래픽 라우팅 기능의 핵심이다.
+가상 서비스는 요청이 istio 서비스 메시 내의 서비스로 어떻게 라우팅되는지를 정의한다. 각 virtual service는 라우팅 규칙들의 집합으로 구성되는데 규칙들은 istio가 주어진 요청에 대해 일치하는 virtual service를 찾아 실제 목적지를 찾을 때가지 정의된 순서대로 평가한다.
+
+### 왜 가상 서비스(virtual service)를 사용할까?
+
+가상 서비스는 istio의 트래픽 관리를 유연하고 강력하게 만드는 핵심 역할을 한다. 가상 서비스는 클라이언트의 요청과 목적지를 디커플링함으로써 앞의 핵심 역할을 달성한다. 가상 서비스는 또한 트래픽을 워크로드로 전달하기 위한 다양한 트래픽 라우팅 정책을 지정할 수 있는 많은 기능을 제공한다.
+
+왜 이게 유용할까? 가상 서비스 없이는, Envoy는 least requests 로드 밸런싱을 사용하여 모든 서비스 인스턴스에 트래픽을 분산시킨다. 우리는 작업자에 대해 아는 것을 통해 이러한 행동을 개선시킬 수있다.
+
+가상 서비스가 있다면 한개 이상의 호스트명으로 트래픽의 행동을 명시할 수 있다. 가상 서비스의 라우팅 규칙을 사용해서 Envoy 프록시가 가상 서비스의 트래픽을 적절한 목적지로 보낼지 알려줄 수 있다. 경로의 목적지는 같은 서비스의 다른 버전이 될 수 있고, 완전히 다른 서비스가 될 수 있다.
 
 ## Reference
 
