@@ -45,6 +45,31 @@ istio의 트래픽 관리 모델은 서비스들과 함께 배포되는 Envoy라
 
 가상 서비스가 있다면 한개 이상의 호스트명으로 트래픽의 행동을 명시할 수 있다. 가상 서비스의 라우팅 규칙을 사용해서 Envoy 프록시가 가상 서비스의 트래픽을 적절한 목적지로 보낼지 알려줄 수 있다. 경로의 목적지는 같은 서비스의 다른 버전이 될 수 있고, 완전히 다른 서비스가 될 수 있다.
 
+### 가상 서비스 예제
+
+```yml
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: reviews
+spec:
+  hosts:
+  - reviews
+  http:
+  - match:
+    - headers:
+        end-user:
+          exact: jason
+    route:
+    - destination:
+        host: reviews
+        subset: v2
+  - route:
+    - destination:
+        host: reviews
+        subset: v3
+```
+
 ## Reference
 
 - https://istio.io/latest/docs/concepts/traffic-management/#introducing-istio-traffic-management
