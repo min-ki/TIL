@@ -70,6 +70,17 @@ spec:
         subset: v3
 ```
 
+### The hosts field
+The hosts field lists the virtual service’s hosts - in other words, the user-addressable destination or destinations that these routing rules apply to. This is the address or addresses the client uses when sending requests to the service.
+
+```yml
+hosts:
+- reviews
+```
+
+The virtual service hostname can be an IP address, a DNS name, or, depending on the platform, a short name (such as a Kubernetes service short name) that resolves, implicitly or explicitly, to a fully qualified domain name (FQDN). You can also use wildcard ("*") prefixes, letting you create a single set of routing rules for all matching services. Virtual service hosts don’t actually have to be part of the Istio service registry, they are simply virtual destinations. This lets you model traffic for virtual hosts that don’t have routable entries inside the mesh.
+
+
 ## Reference
 
 - https://istio.io/latest/docs/concepts/traffic-management/#introducing-istio-traffic-management
