@@ -33,7 +33,7 @@ asyncio는 다음과 같은 트랜스포트를 구현했다.
 #### Transport 계층
 
 트랜스포트 클래스의 계층구조
-[transport-hierachy.md](asyncio/transport-hierachy.md)
+[transport-hierachy.md](transport-hierachy.md)
 
 
 ## Reference
