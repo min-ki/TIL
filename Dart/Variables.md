@@ -68,7 +68,38 @@ print(lineCount);
 
 ## Late variables
 
+```dart
+
+// late키워드를 사용해 변수를 선언하면 실제로 temperature 변수가 사용될때까지 초기화를 미룰 수 있다.
+// 만약 temperature 변수를 사용안하면 readThermometer() 함수는 호출되지 않는다.
+late String temperature = readThermometer(); 
+```
+
 ## Final and const
+
+- final 변수는 한번만 할당할 수 있는 변수
+- const는 컴파일 시점에 알려진 상수를 선언할 때 사용한다.
+
+```dart
+final name = 'Bob'; // 타입 없이 사용할 수 있다. 
+final String nickname = 'Bobby'; // 타입과 함께 사용 가능
+
+name = 'Alice'; // 에러 발생 _ 할당은 한번만 할 수 있다.
+```
+
+```dart
+const bar = 1000000;
+const double atm = 1.01325 * bar;
+```
+
+```dart
+
+const Object i = 3;
+const list = [i as int]; // typecast
+const map = {if (i is int) i: 'int'}
+const set = {if (list is List<int>) ...list}; // spread operator도 있다.
+```
+
 
 # Reference
 - https://dart.dev/language/variables
