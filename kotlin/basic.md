@@ -17,6 +17,7 @@ fun main() {}
 var x = 10
 x = 25 // 가능
 x = 25.5 // 정수타입 -> 부동소수점 변경 불가능
+```
 
 ## 함수 (fun)
 
@@ -35,5 +36,31 @@ fun 함수이름(arg1: Type1, arg2: Type2, ...): ReturnType = 식(expression)
 ```
 - 파라미터의 타입은 추론하지 못하지만, 식의 타입을 추론할 수 있기 때문에 반환 타입을 생략할 수 있다.
 
+## if
+
+```kotlin
+fun main() {
+    val a = 10
+    if (a == 10) {
+        println("참")
+    }
+}
+
+```
+
+### 논리 부정 연산자 (!)
+
+- !는 논리 부정 연산자
+- 불리언 식을 반전한 결과
+
+```kotlin
+fun main() {
+    val x: Boolean = false
+ 
+    if(!x) {
+        println("!x는 참")
+    }
+}
+```
 
 
