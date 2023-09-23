@@ -128,3 +128,100 @@ class MyApp extends StatelessWidget {
 material app이 아닌 앱은 기본으로 앱바, 타이틀, 배경색을 가지지 않는다.
 만약 이런 요소들을 원하면 직접 만들어라.
 
+
+## Lay out multiple widgets vertically and horizontally
+
+가장 흔한 레이아웃 패턴 중 하나는 위젯을 수직 또는 수평으로 배치하는 것이다.
+
+- 수평으로 위젯들을 배치하기 위해서는 `Row` 위젯을 사용하면 된다.
+- 수직으로 위젯들을 배치하기 위해서는 `Column` 위젯을 사용하면 된다.
+- Row, Column들은 저 수준의 위젯. 많은 커스터마이징을 할 수 있다.
+- Row 대신 ListTile, Column 대신 ListView와 같은 고수준 위젯을 사용할 수도 있다.
+
+## Aligning widgets
+
+row 또는 column에 위젯을 배치할 때, `mainAxisAlignment`과 `crossAxisAlignment` 속성을 사용하여 위젯을 정렬할 수 있다.
+
+- row에서 main axis는 수평이고, cross axis는 수직
+![row_diagram](https://docs.flutter.dev/assets/images/docs/ui/layout/row-diagram.png)
+
+- column에서 main axis는 수직이고, cross axis는 수평
+![column_diagram](https://docs.flutter.dev/assets/images/docs/ui/layout/column-diagram.png)
+
+```dart
+Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [
+        Image.asset('images/pic1.jpg'),
+        Image.asset('images/pic2.jpg'),
+        Image.asset('images/pic3.jpg'),
+    ],
+);s
+```
+
+- 위에서 Image.asset에 사용되는 파일들은 pubspec.yaml에 추가되어야 한다.
+- 만약, Image.network를 사용ㅇ하면 pubspec.yaml은 수정할 필요 없다.
+
+```dart
+Column(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 컬럼위젯은 주축이 수직
+    // 수직방향으로 이미지들이 쌓인다.
+    children: [
+        Image.asset('images/pic1.jpg'),
+        Image.asset('images/pic2.jpg'),
+        Image.asset('images/pic3.jpg'),
+    ],
+)
+
+```
+
+## Sizing widgets
+
+레이아웃이 디바이스에 맞추기에 너무 크다면, 노란색과 검정색 패턴이 영향받은 모서리에 나타난다.
+![layout-too-large](https://docs.flutter.dev/assets/images/docs/ui/layout/layout-too-large.png)
+
+위젯은 row 또는 column에서 `Expanded` 위젯을 사용해서 알맞은 사이즈로 조정될 수 있다.
+
+```dart
+
+Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+        Expanded(
+            child: Image.asset('images/pic1.jpg'),
+        ),
+        Expanded(
+            child: Image.asset('images/pic2.jpg'),
+        ),
+        Expanded(
+            child: Image.asset('images/pic3.jpg'),
+        ),
+    ],
+);
+```
+
+flex 속성을 사용하여 위젯이 얼만큼 공간을 차지할 지 결정할 수 있다.
+flex 단어 뜻을 보니 관절을 굽히다. 근육을 수축시키다라는 뜻이 있다.
+
+그렇다면, flex factor가 1인것은 1만큼 수축시킨다는 뜻
+
+그러면 flex factor를 2로 늘리면 수축시킨것을 조금 늘려서 2배로 공간을 차지하게 되는 것으로 이해하면 쉬울 것 같다.
+
+```dart
+Row(
+    crossAxisAlignment: CrossAxisAlignment.center,
+    children: [
+        Expanded(
+            child: Image.asset('images/pic1.jpg'),
+        ),
+        Expanded(
+            flex: 2,
+            child: Image.asset('images/pic2.jpg'),
+        ),
+        Expanded(
+            child: Image.asset('images/pic3.jpg'),
+        ),
+    ],
+);
+```
+![flex-factor-2](https://docs.flutter.dev/assets/images/docs/ui/layout/row-expanded-visual.png)
