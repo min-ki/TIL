@@ -4,23 +4,30 @@
 var name = 'Bob';
 ```
 
-- 변수 선언은 `var` 키워드를 사용한다.
-- 변수는 참조(Reference)를 저장한다.
-- 위의 예시에서, `name`은 String 객체를 참조하고 그 참조객체는 값으로 `Bob`을 가진다.
-- name 변수는 String 타입을 가진다고 추론한다.
+> Variables store references. The variable called name contains a reference to a String object with a value of "Bob".
 
-만약 하나의 타입만 가지지않는다면 `Object` 타입 (또는 `dynamic` 타입)을 사용한다.
+변수의 선언은 `var` 키워드를 사용한다. 위의 예시는 name이라는 변수는 String 객체의 참조를 가지고 그 참조 객체(String)의 값은 'Bob'이다.
+
+> The type of the name variable is inferred to be String, but you can change that type by specifying it. If an object isn't restricted to a single type, specify the Object type (or dynamic if necessary).
+
+name 변수의 타입은 String으로 추론되지만, 타입을 명시적으로 지정해서 변경할 수 있다. 만약 객체가 단일 타입으로 제한되지 않는다면, Object라고 타입을 지정하던지 (필요하다면 dynamic 타입을 사용한다).
 
 ```dart
+// var를 사용하지 않고 명시적으로 타입을 붙인다.
 Object name = 'Bob';
 ```
 
+> Another option is to explicitly declare the type that would be inferred:
+
 다른 옵션은 명시적으로 타입을 적어주는 것이다.
+
 ```dart
-String name = 'Bob';
+String name = 'Bob'; // 추론되는 타입을 적는다.
 ```
 
-> Dart의 style guide는 지역 변수는 타입 어노테이션을 사용하기보다는 var를 사용하는 것을 추천한다.
+> This page follows the style guide recommendation of using var, rather than type annotations, for local variables.
+
+Dart의 style guide는 지역 변수는 타입 어노테이션을 사용하기보다는 var를 사용하는 것을 추천한다.
 
 ## Null safety
 
@@ -39,6 +46,7 @@ String name // Non-nullable type. null을 가질 수 없다.
 - Nullable 타입의 기본값은 null이다.
 
 ## Default value
+
 초기화되지않은 nullable 변수는 기본값으로 null을 가진다.
 
 ```dart
@@ -72,7 +80,7 @@ print(lineCount);
 
 // late키워드를 사용해 변수를 선언하면 실제로 temperature 변수가 사용될때까지 초기화를 미룰 수 있다.
 // 만약 temperature 변수를 사용안하면 readThermometer() 함수는 호출되지 않는다.
-late String temperature = readThermometer(); 
+late String temperature = readThermometer();
 ```
 
 ## Final and const
@@ -81,7 +89,7 @@ late String temperature = readThermometer();
 - const는 컴파일 시점에 알려진 상수를 선언할 때 사용한다.
 
 ```dart
-final name = 'Bob'; // 타입 없이 사용할 수 있다. 
+final name = 'Bob'; // 타입 없이 사용할 수 있다.
 final String nickname = 'Bobby'; // 타입과 함께 사용 가능
 
 name = 'Alice'; // 에러 발생 _ 할당은 한번만 할 수 있다.
@@ -100,6 +108,6 @@ const map = {if (i is int) i: 'int'}
 const set = {if (list is List<int>) ...list}; // spread operator도 있다.
 ```
 
-
 # Reference
+
 - https://dart.dev/language/variables
