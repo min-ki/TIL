@@ -2,8 +2,8 @@
 
 - [x] Defining Routes
 - [x] Pages and Navigating
-- [ ] Linking and Navigating
-- [ ] Loading UI and Streaming
+- [x] Linking and Navigating
+- [x] Loading UI and Streaming
 - [ ] Error Handling
 - [ ] Redirecting
 - [ ] Route Groups
